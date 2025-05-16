@@ -4,7 +4,9 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import ObservationWrapper, spaces
 
-from tarware import Action
+#from tarware import Action
+from tarware.definitions import Action
+
 
 
 class FlattenAgents(gym.Wrapper):
@@ -94,3 +96,34 @@ class SquashDones(gym.Wrapper):
     def step(self, action):
         observation, reward, done, info = self.env.step(action)
         return observation, reward, all(done), info
+    
+class AGVWrapper(gym.Env):
+    def __init__(self, env, agv_id=0):
+        super().__init__()
+        self.env = env
+        self.agv_id = agv_id  # we are training this AGV only
+
+        # Define single-agent action/obs space for PPO
+        self.action_space = self.env.action_space[self.agv_id]
+        self.observation_space = self.env.observation_space[self.agv_id]
+
+    def reset(self, **kwargs):
+        obs = self.env.reset(**kwargs)
+        return obs[self.agv_id]
+
+    def step(self, action):
+        actions = [0] * self.env.num_agents  # all others NOOP
+        actions[self.agv_id] = action
+        obs, rewards, terminateds, truncateds, info = self.env.step(actions)
+
+        return (
+            obs[self.agv_id],
+            rewards[self.agv_id],
+            terminateds[self.agv_id],
+            truncateds[self.agv_id],
+            info,
+        )
+
+    def render(self):
+        return self.env.render()
+

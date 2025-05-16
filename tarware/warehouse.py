@@ -11,6 +11,7 @@ from tarware.definitions import (Action, AgentType, Direction,
 from tarware.spaces import observation_map
 from tarware.utils import find_sections, get_next_micro_action
 
+
 _FIXING_CLASH_TIME = 4
 _STUCK_THRESHOLD = 5
 
@@ -759,3 +760,4 @@ class Warehouse(gym.Env):
     def seed(self, seed=None):
         np.random.seed(seed)
         random.seed(seed)
+
